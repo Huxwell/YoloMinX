@@ -12,6 +12,8 @@ I've used (used = retrained on custom, non-public dataset at least once, usually
 * **Detr**: I struggled to run it with low resolutions
 * **EfficientDet** - I struggled with TFLite, managed to set it up and train correctly, than failed to reinstall a few times; it used to run very fast on embedded boards, but it was always a pain
 * **Faster-RCNN**, **Detectron2** - Similar to MMDetection, a bit outdated and the models are not that fast, it is actively maintained, but It's huge and complex; issues with TensoRT conversions. I've used it for years.
+* **Darknet YOLO**, v2,v3, PyTorch rewrite - impressive, great, but outdated and hardly maintained.
+* **MobileNet-SSD** - No convenient implementation. OpenVino, Caffe, Torchvision ones have their pros, but at the moment I need a PyTorch one that's readable and well maintained.
 
  
 ## Why minimal rewrite?
