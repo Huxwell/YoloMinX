@@ -1,6 +1,37 @@
 # YoloMinX
 Minimal rewrite - WIP
 
+## Why YoloX?
+- Ability to run on very low resolutions (If you stuck 2 YoloX instances, you can get extreme DPI with low CPU latency)
+- Simplicity, lack of dependencies
+## Why not other detectors?
+I've used (used = retrained on custom, non-public dataset at least once, usually much more)
+
+* **Ultralytis YOLO**: license issues, public criticism
+* **YuNet**: MMDetection huge dependency, hard to setup and maintain
+* **Detr**: I struggled to run it with low resolutions
+* **EfficientDet** - I struggled with TFLite, managed to set it up and train correctly, than failed to reinstall a few times; it used to run very fast on embedded boards, but it was always a pain
+* **Faster-RCNN**, **Detectron2** - Similar to MMDetection, a bit outdated and the models are not that fast, it is actively maintained, but It's huge and complex; issues with TensoRT conversions. I've used it for years.
+
+ 
+## Why minimal rewrite?
+* I hate setup, I want to only do it once
+* I love minimalism
+* I want to be able to read whole codebase easily
+* I don't need experiments that lead to a repo creation
+* I prefer specialised computer vision repos over general frameworks
+## Why Nano version
+* Trains even on 4GB vRAM T600 on Dells and other weak laptop GPUs
+* Making your dataset better alone can give you i.e. +45% acc, tuning hyperparams +10%, heavier model +10%. Don't waste time training huge models until your setup is perfect. Small model allows more frequent verification.
+* Research has one constant: dataset (used in challanges and conferences) everything else is variable. For business dataset is the most important variable, 2% mAP closer to sota (on a **public** test set!) is negligible.
+* It's trivial to go back to Yolo-L if needed.
+* Runs on CPUs and embedded devices.
+## Setup
+## My setup story
+`my_setup_story.md` - a dump of all terminal commands that I used for setup, useful for debugging
+
+
+## Original readme below
 
 <div align="center"><img src="assets/logo.png" width="350"></div>
 <img src="assets/demo.png" >
