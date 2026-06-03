@@ -24,7 +24,7 @@ I've used (used = retrained on custom, non-public dataset at least once, usually
 * I prefer specialised computer vision repos over general frameworks
 ## Why Nano version
 * Trains even on 4GB vRAM T600 on Dells and other weak laptop GPUs
-* Making your dataset better alone can give you i.e. +45% acc, tuning hyperparams +10%, heavier model +10%. Don't waste time training huge models until your setup is perfect. Small model allows more frequent verification.
+* In my experience, working on the dataset and it's preprocessing gives more benefits than switching to better (heavier) model. Small model allows more frequent verification when you work on your data.
 * Research has one constant: dataset (used in challanges and conferences) everything else is variable. For business dataset is the most important variable, 2% mAP closer to sota (on a **public** test set!) is negligible.
 * It's trivial to go back to Yolo-L if needed.
 * Runs on CPUs and embedded devices.
