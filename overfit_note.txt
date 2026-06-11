@@ -1,0 +1,38 @@
+2026-06-11 12:13:15 | INFO     | yolox.core.trainer:270 - epoch: 24/50, iter: 2600/2693, gpu mem: 1176Mb, mem: 14.2Gb, iter_time: 0.041s, data_time: 0.001s, total_loss: 8.9, iou_loss: 3.4, l1_loss: 0.0, conf_loss: 4.8, cls_loss: 0.7, lr: 7.692e-05, size: 512, ETA: 0:46:06
+2026-06-11 12:13:18 | INFO     | yolox.core.trainer:402 - Save weights to ./YOLOX_outputs/yolox_nano_person
+100%|####################################################################################################################################################| 2693/2693 [00:21<00:00, 126.28it/s]
+2026-06-11 12:13:40 | INFO     | yolox.evaluators.coco_evaluator:259 - Evaluate in main process...
+2026-06-11 12:13:40 | INFO     | yolox.evaluators.coco_evaluator:292 - Loading and preparing results...
+2026-06-11 12:13:40 | INFO     | yolox.evaluators.coco_evaluator:292 - DONE (t=0.17s)
+2026-06-11 12:13:40 | INFO     | pycocotools.coco:367 - creating index...
+2026-06-11 12:13:40 | INFO     | pycocotools.coco:367 - index created!
+No modifications detected for re-loaded extension module fast_cocoeval, skipping build step...
+Loading extension module fast_cocoeval...
+Running per image evaluation...
+Evaluate annotation type *bbox*
+2026-06-11 12:13:40 | INFO     | yolox.layers.jit_ops:111 - Load fast_cocoeval op in 0.001s.
+COCOeval_opt.evaluate() finished in 0.14 seconds.
+Accumulating evaluation results...
+COCOeval_opt.accumulate() finished in 0.03 seconds.
+2026-06-11 12:13:40 | INFO     | yolox.core.trainer:381 - 
+Average forward time: 6.69 ms, Average NMS time: 0.65 ms, Average inference time: 7.34 ms
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.014
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.045
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.004
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.001
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.007
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.039
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.019
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.051
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.054
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.001
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.024
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.180
+per class AP:
+| class   | AP    |
+|:--------|:------|
+| person  | 1.421 |
+per class AR:
+| class   | AR    |
+|:--------|:------|
+| person  | 5.435 |
