@@ -17,20 +17,22 @@ I've used (used = retrained on custom, non-public dataset at least once, usually
 
  
 ## Why minimal rewrite?
-* I hate setup, I want to only do it once
-* I love minimalism
+* I like minimalism and easy setup
 * I want to be able to read whole codebase easily
-* I don't need experiments that lead to a repo creation
+* I don't need the original experiments that lead to a repo creation
 * I prefer specialised computer vision repos over general frameworks
-## Why Nano version
-* Trains even on 4GB vRAM T600 on Dells and other weak laptop GPUs
-* In my experience, working on the dataset and it's preprocessing gives more benefits than switching to better (heavier) model. Small model allows more frequent verification when you work on your data.
+## Why only Nano (and YoloX-X) versions
+* Nano Trains even on 4GB vRAM T600 on Dells and other weak laptop GPUs
+* In my experience, working on the dataset and it's preprocessing should preceed switching to better (heavier) model. Small model allows more frequent verification when you work on your data.
 * Research has one constant: dataset (used in challanges and conferences) everything else is variable. For business dataset is the most important variable, 2% mAP closer to sota (on a **public** test set!) is negligible.
-* It's trivial to go back to Yolo-L if needed.
 * Runs on CPUs and embedded devices.
+* YoloX-X is the heaviest one with highest mAP, it's interesting to compare both extremes of the parmeters count
 ## Setup
 
-See [setup.md](setup.md) — clone, venv, install, download 4-image COCO subset, train, get mAP.
+See [setup.md](setup.md) — clone, venv, install, download COCO val, filter Person class subset, get 4-50 images, overfit, get mAP (to verify pipeline).
+### Why not **COCO128** as quick verification of models? 
+1) License - may be AGPL (ultralytics/cfg/datasets/coco128.yaml says it is), it may force you to make everything that touched it AGPL as well (big problem if you are doing anything commercial) 
+2) It's usually run on weights that were already trained on COCO which doesn't make sense to me - how does it verify if training works correctly? If you want to overfit COCO128 in 5-30min it may still be 0.0% mAP on most models that actually train well.
 
 
 ## Original readme below
