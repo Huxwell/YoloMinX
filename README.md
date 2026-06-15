@@ -29,8 +29,8 @@ I've used (used = retrained on custom, non-public dataset at least once, usually
 * It's trivial to go back to Yolo-L if needed.
 * Runs on CPUs and embedded devices.
 ## Setup
-## My setup story
-`my_setup_story.md` - a dump of all terminal commands that I used for setup, useful for debugging
+
+See [setup.md](setup.md) — clone, venv, install, download 4-image COCO subset, train, get mAP.
 
 
 ## Original readme below

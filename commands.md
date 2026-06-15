@@ -183,6 +183,10 @@ cd ~/Documents/YoloMinX && PYTHONPATH=~/Documents/YoloMinX yolox_venv/bin/python
 
 cd ~/Documents/YoloMinX && PYTHONPATH=~/Documents/YoloMinX yolox_venv/bin/python tools/train.py -f exps/default/yolox_nano_person.py -d 1 -b 4 data_dir ~/Documents/YoloMinX/datasets train_ann instances_val2017_person_200.json val_ann instances_val2017_person_200.json multiscale_range 0 mosaic_prob 0 max_epoch 100 eval_interval 1 no_aug_epochs 5 warmup_epochs 1
 
-the best variant:
+## Single-batch overfit (4 images): pipeline smoke test — loss should reach near-zero
 
-cd ~/Documents/YoloMinX && PYTHONPATH=~/Documents/YoloMinX yolox_venv/bin/python tools/train.py   -f exps/default/yolox_nano_person.py   -d 1 -b 4   data_dir ~/Documents/YoloMinX/datasets   train_ann instances_val2017_person_50.json   val_ann instances_val2017_person_50.json   multiscale_range 0   mosaic_prob 0   max_epoch 500   eval_interval 1   no_aug_epochs 5   warmup_epochs 1
+cd ~/Documents/YoloMinX && PYTHONPATH=~/Documents/YoloMinX yolox_venv/bin/python tools/train.py -f exps/default/yolox_nano_person.py -d 1 -b 4 data_dir ~/Documents/YoloMinX/datasets train_ann instances_val2017_person_4.json val_ann instances_val2017_person_4.json multiscale_range 0 mosaic_prob 0 max_epoch 2000 eval_interval 10 no_aug_epochs 5 warmup_epochs 1
+
+## the best variant:
+
+cd ~/Documents/YoloMinX && PYTHONPATH=~/Documents/YoloMinX yolox_venv/bin/python tools/train.py   -f exps/default/yolox_nano_person.py   -d 1 -b 4   data_dir ~/Documents/YoloMinX/datasets   train_ann instances_val2017_person_50.json   val_ann instances_val2017_person_50.json   multiscale_range 0   mosaic_prob 0   max_epoch 2000   eval_interval 1   no_aug_epochs 5   warmup_epochs 1
