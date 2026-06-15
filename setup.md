@@ -62,6 +62,7 @@ python3 datasets/filter_coco_person.py \
   --out-ann datasets/annotations/instances_val2017_person_4.json \
   --out-images-dir datasets/val2017_person_4 \
   --max-images 4
+ln -s val2017 datasets/train2017
 ```
 
 ## 8. Train (4-image overfit, ~2000 epochs)
