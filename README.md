@@ -1,5 +1,9 @@
 # YoloMinX
-Minimal rewrite - WIP
+Minimal rewrite.
+
+Branches:
+* main - removed files redundant for an end user (a developer that builds on top of YoloX). Keeping training on custom data, testing, replicating COCO, exporting to onnx, tensorrt, openvino. This is the branch I use whenever I want to use YoloX in a commercial scenario.
+* minimal - only keeping the Nano version and as little abstraction as possible - great for learning
 
 ## Why YoloX?
 - Ability to run on very low resolutions (If you stuck 2 YoloX instances, you can get extreme DPI with low CPU latency)
@@ -21,12 +25,12 @@ I've used (used = retrained on custom, non-public dataset at least once, usually
 * I want to be able to read whole codebase easily
 * I don't need the original experiments that lead to a repo creation
 * I prefer specialised computer vision repos over general frameworks
-## Why only Nano (and YoloX-X) versions
+## Why only Nano version in the minimal branch
 * Nano Trains even on 4GB vRAM T600 on Dells and other weak laptop GPUs
 * In my experience, working on the dataset and it's preprocessing should preceed switching to better (heavier) model. Small model allows more frequent verification when you work on your data.
 * Research has one constant: dataset (used in challanges and conferences) everything else is variable. For business dataset is the most important variable, 2% mAP closer to sota (on a **public** test set!) is negligible.
 * Runs on CPUs and embedded devices.
-* YoloX-X is the heaviest one with highest mAP, it's interesting to compare both extremes of the parmeters count
+
 ## Setup
 
 See [setup.md](setup.md) — clone, venv, install, download COCO val, filter Person class subset, get 4-50 images, overfit, get mAP (to verify pipeline).
