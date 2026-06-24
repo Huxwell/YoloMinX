@@ -10,9 +10,8 @@ from loguru import logger
 import torch
 import torch.backends.cudnn as cudnn
 
-from yolox.core import launch
 from yolox.exp import Exp, check_exp_value, get_exp
-from yolox.utils import configure_module, configure_nccl, configure_omp, get_num_devices
+from yolox.utils import configure_module, configure_omp
 
 
 def make_parser():
@@ -109,8 +108,6 @@ def main(exp: Exp, args):
             "when restarting from checkpoints."
         )
 
-    # set environment variables for distributed training
-    configure_nccl()
     configure_omp()
     cudnn.benchmark = True
 
@@ -128,19 +125,7 @@ if __name__ == "__main__":
     if not args.experiment_name:
         args.experiment_name = exp.exp_name
 
-    num_gpu = get_num_devices() if args.devices is None else args.devices
-    assert num_gpu <= get_num_devices()
-
     if args.cache is not None:
         exp.dataset = exp.get_dataset(cache=True, cache_type=args.cache)
 
-    dist_url = "auto" if args.dist_url is None else args.dist_url
-    launch(
-        main,
-        num_gpu,
-        args.num_machines,
-        args.machine_rank,
-        backend=args.dist_backend,
-        dist_url=dist_url,
-        args=(exp, args),
-    )
+    main(exp, args)
