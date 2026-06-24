@@ -4,11 +4,10 @@
 
 import contextlib
 import io
-import itertools
 import json
 import tempfile
 import time
-from collections import ChainMap, defaultdict
+from collections import defaultdict
 from loguru import logger
 from tabulate import tabulate
 from tqdm import tqdm
@@ -19,10 +18,7 @@ import torch
 
 from yolox.data.datasets import COCO_CLASSES
 from yolox.utils import (
-    gather,
-    is_main_process,
     postprocess,
-    synchronize,
     time_synchronized,
     xyxy2xywh
 )
@@ -114,7 +110,7 @@ class COCOEvaluator:
         self.per_class_AR = per_class_AR
 
     def evaluate(
-        self, model, distributed=False, half=False, trt_file=None,
+        self, model, half=False, trt_file=None,
         decoder=None, test_size=None, return_outputs=False
     ):
         """
@@ -139,7 +135,7 @@ class COCOEvaluator:
         ids = []
         data_list = []
         output_data = defaultdict()
-        progress_bar = tqdm if is_main_process() else iter
+        progress_bar = tqdm
 
         inference_time = 0
         nms_time = 0
@@ -187,18 +183,8 @@ class COCOEvaluator:
             output_data.update(image_wise_data)
 
         statistics = torch.cuda.FloatTensor([inference_time, nms_time, n_samples])
-        if distributed:
-            # different process/device might have different speed,
-            # to make sure the process will not be stucked, sync func is used here.
-            synchronize()
-            data_list = gather(data_list, dst=0)
-            output_data = gather(output_data, dst=0)
-            data_list = list(itertools.chain(*data_list))
-            output_data = dict(ChainMap(*output_data))
-            torch.distributed.reduce(statistics, dst=0)
 
         eval_results = self.evaluate_prediction(data_list, statistics)
-        synchronize()
 
         if return_outputs:
             return eval_results, output_data
@@ -253,9 +239,6 @@ class COCOEvaluator:
         return data_list
 
     def evaluate_prediction(self, data_dict, statistics):
-        if not is_main_process():
-            return 0, 0, None
-
         logger.info("Evaluate in main process...")
 
         annType = ["segm", "bbox", "keypoints"]

@@ -33,7 +33,7 @@ class BaseExp(metaclass=ABCMeta):
 
     @abstractmethod
     def get_data_loader(
-        self, batch_size: int, is_distributed: bool
+        self, batch_size: int
     ) -> Dict[str, torch.utils.data.DataLoader]:
         pass
 

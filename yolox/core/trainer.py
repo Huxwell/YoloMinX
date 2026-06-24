@@ -7,7 +7,6 @@ import time
 from loguru import logger
 
 import torch
-from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.tensorboard import SummaryWriter
 
 from yolox.data import DataPrefetcher
@@ -17,19 +16,15 @@ from yolox.utils import (
     ModelEMA,
     WandbLogger,
     adjust_status,
-    all_reduce_norm,
     get_local_rank,
     get_model_info,
     get_rank,
-    get_world_size,
     gpu_mem_usage,
-    is_parallel,
     load_ckpt,
     mem_usage,
     occupy_mem,
     save_checkpoint,
     setup_logger,
-    synchronize
 )
 
 
@@ -44,7 +39,6 @@ class Trainer:
         self.max_epoch = exp.max_epoch
         self.amp_training = args.fp16
         self.scaler = torch.cuda.amp.GradScaler(enabled=args.fp16)
-        self.is_distributed = get_world_size() > 1
         self.rank = get_rank()
         self.local_rank = get_local_rank()
         self.device = "cuda:{}".format(self.local_rank)
@@ -149,7 +143,6 @@ class Trainer:
         self.no_aug = self.start_epoch >= self.max_epoch - self.exp.no_aug_epochs
         self.train_loader = self.exp.get_data_loader(
             batch_size=self.args.batch_size,
-            is_distributed=self.is_distributed,
             no_aug=self.no_aug,
             cache_img=self.args.cache,
         )
@@ -164,9 +157,6 @@ class Trainer:
         if self.args.occupy:
             occupy_mem(self.local_rank)
 
-        if self.is_distributed:
-            model = DDP(model, device_ids=[self.local_rank], broadcast_buffers=False)
-
         if self.use_model_ema:
             self.ema_model = ModelEMA(model, 0.9998)
             self.ema_model.updates = self.max_iter * self.start_epoch
@@ -174,7 +164,7 @@ class Trainer:
         self.model = model
 
         self.evaluator = self.exp.get_evaluator(
-            batch_size=self.args.batch_size, is_distributed=self.is_distributed
+            batch_size=self.args.batch_size
         )
         # Tensorboard and Wandb loggers
         if self.rank == 0:
@@ -220,10 +210,7 @@ class Trainer:
             logger.info("--->No mosaic aug now!")
             self.train_loader.close_mosaic()
             logger.info("--->Add additional L1 loss now!")
-            if self.is_distributed:
-                self.model.module.head.use_l1 = True
-            else:
-                self.model.head.use_l1 = True
+            self.model.head.use_l1 = True
             self.exp.eval_interval = 1
             if not self.no_aug:
                 self.save_ckpt(ckpt_name="last_mosaic_epoch")
@@ -232,7 +219,6 @@ class Trainer:
         self.save_ckpt(ckpt_name="latest")
 
         if (self.epoch + 1) % self.exp.eval_interval == 0:
-            all_reduce_norm(self.model)
             self.evaluate_and_save_model()
 
     def before_iter(self):
@@ -299,9 +285,7 @@ class Trainer:
 
         # random resizing
         if (self.progress_in_iter + 1) % 10 == 0:
-            self.input_size = self.exp.random_resize(
-                self.train_loader, self.epoch, self.rank, self.is_distributed
-            )
+            self.input_size = self.exp.random_resize(self.train_loader, self.epoch)
 
     @property
     def progress_in_iter(self):
@@ -347,12 +331,10 @@ class Trainer:
             evalmodel = self.ema_model.ema
         else:
             evalmodel = self.model
-            if is_parallel(evalmodel):
-                evalmodel = evalmodel.module
 
         with adjust_status(evalmodel, training=False):
             (ap50_95, ap50, summary), predictions = self.exp.eval(
-                evalmodel, self.evaluator, self.is_distributed, return_outputs=True
+                evalmodel, self.evaluator, return_outputs=True
             )
 
         update_best_ckpt = ap50_95 > self.best_ap
@@ -378,7 +360,6 @@ class Trainer:
                 }
                 self.mlflow_logger.on_log(self.args, self.exp, self.epoch+1, logs)
             logger.info("\n" + summary)
-        synchronize()
 
         self.save_ckpt("last_epoch", update_best_ckpt, ap=ap50_95)
         if self.save_history_ckpt:

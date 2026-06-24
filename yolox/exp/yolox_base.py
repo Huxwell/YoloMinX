@@ -5,7 +5,6 @@ import os
 import random
 
 import torch
-import torch.distributed as dist
 import torch.nn as nn
 
 from .base_exp import BaseExp
@@ -152,7 +151,7 @@ class Exp(BaseExp):
             cache_type=cache_type,
         )
 
-    def get_data_loader(self, batch_size, is_distributed, no_aug=False, cache_img: str = None):
+    def get_data_loader(self, batch_size, no_aug=False, cache_img: str = None):
         """
         Get dataloader according to cache_img parameter.
         Args:
@@ -198,9 +197,6 @@ class Exp(BaseExp):
             mixup_prob=self.mixup_prob,
         )
 
-        if is_distributed:
-            batch_size = batch_size // dist.get_world_size()
-
         sampler = InfiniteSampler(len(self.dataset), seed=self.seed if self.seed else 0)
 
         batch_sampler = YoloBatchSampler(
@@ -221,25 +217,14 @@ class Exp(BaseExp):
 
         return train_loader
 
-    def random_resize(self, data_loader, epoch, rank, is_distributed):
-        tensor = torch.LongTensor(2).cuda()
-
-        if rank == 0:
-            size_factor = self.input_size[1] * 1.0 / self.input_size[0]
-            if not hasattr(self, 'random_size'):
-                min_size = int(self.input_size[0] / 32) - self.multiscale_range
-                max_size = int(self.input_size[0] / 32) + self.multiscale_range
-                self.random_size = (min_size, max_size)
-            size = random.randint(*self.random_size)
-            size = (int(32 * size), 32 * int(size * size_factor))
-            tensor[0] = size[0]
-            tensor[1] = size[1]
-
-        if is_distributed:
-            dist.barrier()
-            dist.broadcast(tensor, 0)
-
-        input_size = (tensor[0].item(), tensor[1].item())
+    def random_resize(self, data_loader, epoch):
+        size_factor = self.input_size[1] * 1.0 / self.input_size[0]
+        if not hasattr(self, 'random_size'):
+            min_size = int(self.input_size[0] / 32) - self.multiscale_range
+            max_size = int(self.input_size[0] / 32) + self.multiscale_range
+            self.random_size = (min_size, max_size)
+        size = random.randint(*self.random_size)
+        input_size = (int(32 * size), 32 * int(size * size_factor))
         return input_size
 
     def preprocess(self, inputs, targets, tsize):
@@ -309,16 +294,10 @@ class Exp(BaseExp):
             preproc=ValTransform(legacy=legacy),
         )
 
-    def get_eval_loader(self, batch_size, is_distributed, **kwargs):
+    def get_eval_loader(self, batch_size, **kwargs):
         valdataset = self.get_eval_dataset(**kwargs)
 
-        if is_distributed:
-            batch_size = batch_size // dist.get_world_size()
-            sampler = torch.utils.data.distributed.DistributedSampler(
-                valdataset, shuffle=False
-            )
-        else:
-            sampler = torch.utils.data.SequentialSampler(valdataset)
+        sampler = torch.utils.data.SequentialSampler(valdataset)
 
         dataloader_kwargs = {
             "num_workers": self.data_num_workers,
@@ -330,11 +309,11 @@ class Exp(BaseExp):
 
         return val_loader
 
-    def get_evaluator(self, batch_size, is_distributed, testdev=False, legacy=False):
+    def get_evaluator(self, batch_size, testdev=False, legacy=False):
         from yolox.evaluators import COCOEvaluator
 
         return COCOEvaluator(
-            dataloader=self.get_eval_loader(batch_size, is_distributed,
+            dataloader=self.get_eval_loader(batch_size,
                                             testdev=testdev, legacy=legacy),
             img_size=self.test_size,
             confthre=self.test_conf,
@@ -349,8 +328,8 @@ class Exp(BaseExp):
         # NOTE: trainer shouldn't be an attribute of exp object
         return trainer
 
-    def eval(self, model, evaluator, is_distributed, half=False, return_outputs=False):
-        return evaluator.evaluate(model, is_distributed, half, return_outputs=return_outputs)
+    def eval(self, model, evaluator, half=False, return_outputs=False):
+        return evaluator.evaluate(model, half, return_outputs=return_outputs)
 
 
 def check_exp_value(exp: Exp):

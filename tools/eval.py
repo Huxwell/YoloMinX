@@ -10,7 +10,6 @@ from loguru import logger
 
 import torch
 import torch.backends.cudnn as cudnn
-from torch.nn.parallel import DistributedDataParallel as DDP
 
 from yolox.exp import get_exp
 from yolox.utils import (
@@ -111,7 +110,7 @@ def make_parser():
 
 
 @logger.catch
-def main(exp, args, num_gpu):
+def main(exp, args):
     if args.seed is not None:
         random.seed(args.seed)
         torch.manual_seed(args.seed)
@@ -119,8 +118,6 @@ def main(exp, args, num_gpu):
         warnings.warn(
             "You have chosen to seed testing. This will turn on the CUDNN deterministic setting, "
         )
-
-    is_distributed = num_gpu > 1
 
     cudnn.benchmark = True
 
@@ -145,7 +142,7 @@ def main(exp, args, num_gpu):
     logger.info("Model Summary: {}".format(get_model_info(model, exp.test_size)))
     logger.info("Model Structure:\n{}".format(str(model)))
 
-    evaluator = exp.get_evaluator(args.batch_size, is_distributed, args.test, args.legacy)
+    evaluator = exp.get_evaluator(args.batch_size, args.test, args.legacy)
     evaluator.per_class_AP = True
     evaluator.per_class_AR = True
 
@@ -164,17 +161,14 @@ def main(exp, args, num_gpu):
         model.load_state_dict(ckpt["model"])
         logger.info("loaded checkpoint done.")
 
-    if is_distributed:
-        model = DDP(model, device_ids=[rank])
-
     if args.fuse:
         logger.info("\tFusing model...")
         model = fuse_model(model)
 
     if args.trt:
         assert (
-            not args.fuse and not is_distributed and args.batch_size == 1
-        ), "TensorRT model is not support model fusing and distributed inferencing!"
+            not args.fuse and args.batch_size == 1
+        ), "TensorRT model is not support model fusing!"
         trt_file = os.path.join(file_name, "model_trt.pth")
         assert os.path.exists(
             trt_file
@@ -187,7 +181,7 @@ def main(exp, args, num_gpu):
 
     # start evaluate
     *_, summary = evaluator.evaluate(
-        model, is_distributed, args.fp16, trt_file, decoder, exp.test_size
+        model, args.fp16, trt_file, decoder, exp.test_size
     )
     logger.info("\n" + summary)
 
@@ -201,4 +195,4 @@ if __name__ == "__main__":
     if not args.experiment_name:
         args.experiment_name = exp.exp_name
 
-    main(exp, args, 1)
+    main(exp, args)

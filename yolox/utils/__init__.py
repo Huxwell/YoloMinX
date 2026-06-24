@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) Megvii Inc. All rights reserved.
 
-from .allreduce_norm import *
 from .boxes import *
 from .checkpoint import load_ckpt, save_checkpoint
 from .compat import meshgrid
