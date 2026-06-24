@@ -83,3 +83,16 @@ PYTHONPATH=. yolox_venv/bin/python tools/train.py \
 ```
 
 mAP is printed after each eval interval. With 4 images the model should overfit to 0.1-0.2 mAP (depending on random weights) in 1-2k epochs and closer to 0.7 (for IoU 0.5) over 8-10k epochs (~10min on 4gb vRAM T600)
+
+## 9. Run inference on an image
+
+```bash
+PYTHONPATH=. yolox_venv/bin/python tools/demo.py image \
+  -f exps/default/yolox_nano_person.py \
+  -c YOLOX_outputs/yolox_nano_person/best_ckpt.pth \
+  --path datasets/val2017_person_4/000000000139.jpg \
+  --conf 0.25 --nms 0.45 --tsize 416 \
+  --save_result --device gpu
+```
+
+The annotated image is saved under `YOLOX_outputs/yolox_nano_person/vis_res/`.
