@@ -70,7 +70,7 @@ ln -s val2017 datasets/train2017
 ```bash
 PYTHONPATH=. yolox_venv/bin/python tools/train.py \
   -f exps/default/yolox_nano_person.py \
-  -d 1 -b 4 \
+  -b 4 \
   data_dir $(pwd)/datasets \
   train_ann instances_val2017_person_4.json \
   val_ann instances_val2017_person_4.json \
